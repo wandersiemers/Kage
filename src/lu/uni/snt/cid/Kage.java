@@ -13,7 +13,7 @@ import lu.uni.snt.cid.ccg.ConditionalCallGraph;
 import lu.uni.snt.cid.dcl.DexHunter;
 import lu.uni.snt.cid.utils.MethodSignature;
 
-public class CiD
+public class Kage
 {
 	public static void main(String[] args) 
 	{
