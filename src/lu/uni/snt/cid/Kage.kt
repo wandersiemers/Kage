@@ -28,7 +28,7 @@ object Kage {
         }
     }
 
-    private fun mine(apkPath: String?, androidJars: String?) {
+    private fun mine(apkPath: String, androidJars: String) {
         //(1) Unzip Android APK and extract all additionally accessed DEXes
         val additionalDexes = DexHunter(apkPath).hunt()
 
