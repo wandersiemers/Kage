@@ -28,7 +28,7 @@ object Kage {
         }
     }
 
-    fun mine(apkPath: String?, androidJars: String?) {
+    private fun mine(apkPath: String?, androidJars: String?) {
         //(1) Unzip Android APK and extract all additionally accessed DEXes
         val additionalDexes = DexHunter(apkPath).hunt()
 
@@ -62,10 +62,10 @@ object Kage {
         println("Collected " + extractor.primaryAPIs.size + " " + "Android APIs in the primary DEX file")
         println("Collected " + extractor.secondaryAPIs.size + " " + "Android APIs in the secondary DEX files")
 
-        val problematicAPIs_forward: MutableSet<APILife> = HashSet()
-        val protectedAPIs_forward: MutableSet<APILife> = HashSet()
-        val problematicAPIs_backward: MutableSet<APILife> = HashSet()
-        val protectedAPIs_backward: MutableSet<APILife> = HashSet()
+        val problematicAPIsForward: MutableSet<APILife> = HashSet()
+        val protectedAPIsForward: MutableSet<APILife> = HashSet()
+        val problematicAPIsBackward: MutableSet<APILife> = HashSet()
+        val protectedAPIsBackward: MutableSet<APILife> = HashSet()
 
         for (method in extractor.usedAndroidAPIs) {
             val lifetime = AndroidAPILifeModel.getInstance().getLifetime(method)
@@ -80,44 +80,44 @@ object Kage {
 
             if (lifetime.maxAPILevel < maxAPILevel) {
                 if (ConditionalCallGraph.obtainConditions(method).isEmpty()) {
-                    problematicAPIs_forward.add(lifetime)
+                    problematicAPIsForward.add(lifetime)
                 } else {
-                    protectedAPIs_forward.add(lifetime)
+                    protectedAPIsForward.add(lifetime)
                 }
             }
 
             if (lifetime.minAPILevel > minAPILevel && lifetime.minAPILevel > 1) {
                 if (ConditionalCallGraph.obtainConditions(method).isEmpty()) {
-                    problematicAPIs_backward.add(lifetime)
+                    problematicAPIsBackward.add(lifetime)
                 } else {
-                    protectedAPIs_backward.add(lifetime)
+                    protectedAPIsBackward.add(lifetime)
                 }
             }
         }
 
         println("SDK Check:" + Config.containsSDKVersionChecker)
-        println("Found " + protectedAPIs_forward.size + " Android APIs (for forward compatibility) that are accessed with protection (SDK Check)")
-        println("Found " + problematicAPIs_forward.size + " Android APIs (for forward compatibility) that are accessed problematically ")
-        println("Found " + protectedAPIs_backward.size + " Android APIs (for backward compatibility) that are accessed with protection (SDK Check)")
-        println("Found " + problematicAPIs_backward.size + " Android APIs (for backward compatibility) that are accessed problematically ")
+        println("Found " + protectedAPIsForward.size + " Android APIs (for forward compatibility) that are accessed with protection (SDK Check)")
+        println("Found " + problematicAPIsForward.size + " Android APIs (for forward compatibility) that are accessed problematically ")
+        println("Found " + protectedAPIsBackward.size + " Android APIs (for backward compatibility) that are accessed with protection (SDK Check)")
+        println("Found " + problematicAPIsBackward.size + " Android APIs (for backward compatibility) that are accessed problematically ")
 
-        for (lifetime in protectedAPIs_forward) {
+        for (lifetime in protectedAPIsForward) {
             println("\n==>Protected_Forward$lifetime")
             printMethod(extractor, lifetime)
         }
 
-        for (lifetime in problematicAPIs_forward) {
+        for (lifetime in problematicAPIsForward) {
             println("\n==>Problematic_Forward$lifetime")
             printMethod(extractor, lifetime)
         }
 
 
-        for (lifetime in protectedAPIs_backward) {
+        for (lifetime in protectedAPIsBackward) {
             println("\n==>Protected_Backward$lifetime")
             printMethod(extractor, lifetime)
         }
 
-        for (lifetime in problematicAPIs_backward) {
+        for (lifetime in problematicAPIsBackward) {
             println("\n==>Problematic_Backward$lifetime")
             printMethod(extractor, lifetime)
         }
@@ -136,7 +136,7 @@ object Kage {
         }
     }
 
-    fun inferAPILevel(manifest: AndroidManifest): Int {
+    private fun inferAPILevel(manifest: AndroidManifest): Int {
         val apiLevel = if (-1 != manifest.targetSdkVersion) {
             manifest.targetSdkVersion
         } else if (-1 != manifest.maxSdkVersion) {
@@ -148,7 +148,7 @@ object Kage {
         return apiLevel
     }
 
-    fun clean(apkName: String) {
+    private fun clean(apkName: String) {
         try {
             FileUtils.deleteDirectory(File("$apkName.unzip"))
         } catch (e: IOException) {
