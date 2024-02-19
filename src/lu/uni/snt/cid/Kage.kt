@@ -53,7 +53,7 @@ object Kage {
         //(4) SDK check study (expand constructors)
         ConditionalCallGraph.expandConstructors()
 
-        println("--------------------------------------------------------------------------------------------------------")
+        println("---------------------------------------------------------------------------------------")
 
         println("Declared Min Sdk version is: " + manifest.minSdkVersion)
         println("Declared Target Sdk version is: " + manifest.targetSdkVersion)
@@ -63,9 +63,9 @@ object Kage {
         println("Collected " + extractor.secondaryAPIs.size + " " + "Android APIs in the secondary DEX files")
 
         val problematicAPIsForward: MutableSet<APILife> = HashSet()
-        val protectedAPIsForward: MutableSet<APILife> = HashSet()
+        val safeAPIsForward: MutableSet<APILife> = HashSet()
         val problematicAPIsBackward: MutableSet<APILife> = HashSet()
-        val protectedAPIsBackward: MutableSet<APILife> = HashSet()
+        val safeAPIsBackward: MutableSet<APILife> = HashSet()
 
         for (method in extractor.usedAndroidAPIs) {
             val lifetime = AndroidAPILifeModel.getInstance().getLifetime(method)
@@ -82,7 +82,7 @@ object Kage {
                 if (ConditionalCallGraph.obtainConditions(method).isEmpty()) {
                     problematicAPIsForward.add(lifetime)
                 } else {
-                    protectedAPIsForward.add(lifetime)
+                    safeAPIsForward.add(lifetime)
                 }
             }
 
@@ -90,18 +90,22 @@ object Kage {
                 if (ConditionalCallGraph.obtainConditions(method).isEmpty()) {
                     problematicAPIsBackward.add(lifetime)
                 } else {
-                    protectedAPIsBackward.add(lifetime)
+                    safeAPIsBackward.add(lifetime)
                 }
             }
         }
 
         println("SDK Check:" + Config.containsSDKVersionChecker)
-        println("Found " + protectedAPIsForward.size + " Android APIs (for forward compatibility) that are accessed with protection (SDK Check)")
-        println("Found " + problematicAPIsForward.size + " Android APIs (for forward compatibility) that are accessed problematically ")
-        println("Found " + protectedAPIsBackward.size + " Android APIs (for backward compatibility) that are accessed with protection (SDK Check)")
-        println("Found " + problematicAPIsBackward.size + " Android APIs (for backward compatibility) that are accessed problematically ")
+        println("Found ${safeAPIsForward.size} Android APIs (for forward compatibility) that are accessed" +
+                " with protection (SDK Check)")
+        println("Found ${problematicAPIsForward.size} Android APIs (for forward compatibility) that are accessed" +
+                " problematically ")
+        println("Found ${safeAPIsBackward.size} Android APIs (for backward compatibility) that are accessed" +
+                " with protection (SDK Check)")
+        println("Found ${problematicAPIsBackward.size} Android APIs (for backward compatibility) that are accessed" +
+                " problematically ")
 
-        for (lifetime in protectedAPIsForward) {
+        for (lifetime in safeAPIsForward) {
             println("\n==>Protected_Forward$lifetime")
             printMethod(extractor, lifetime)
         }
@@ -111,8 +115,7 @@ object Kage {
             printMethod(extractor, lifetime)
         }
 
-
-        for (lifetime in protectedAPIsBackward) {
+        for (lifetime in safeAPIsBackward) {
             println("\n==>Protected_Backward$lifetime")
             printMethod(extractor, lifetime)
         }
