@@ -25,7 +25,8 @@ public class AndroidSDKVersionChecker {
 		}
 	}
 
-	static void traverse(Body b, ExceptionalUnitGraph graph, Unit unit, Set<Value> sdkIntValues, Set<String> conditions, Set<Unit> visitedUnits) {
+	static void traverse(Body b, ExceptionalUnitGraph graph, Unit unit, Set<Value> sdkIntValues,
+						 Set<String> conditions, Set<Unit> visitedUnits) {
 		if (visitedUnits.contains(unit)) {
 			return;
 		} else {
@@ -50,7 +51,8 @@ public class AndroidSDKVersionChecker {
 			}
 
 			if (stmt.containsInvokeExpr()) {
-				Edge edge = ConditionalCallGraph.getEdge(b.getMethod().getSignature(), stmt.getInvokeExpr().getMethod().getSignature());
+				Edge edge = ConditionalCallGraph.getEdge(b.getMethod().getSignature(),
+					stmt.getInvokeExpr().getMethod().getSignature());
 				edge.conditions.add(conditions.toString());
 
 				ConditionalCallGraph.addEdge(edge);
@@ -67,7 +69,8 @@ public class AndroidSDKVersionChecker {
 					Set<SootClass> subClasses = SootUtils.getAllSubClasses(sootClass);
 
 					for (SootClass subClass : subClasses) {
-						Edge e = ConditionalCallGraph.getEdge(edge.srcSig, edge.tgtSig.replace(sootClass.getName() + ":", subClass.getName() + ":"));
+						Edge e = ConditionalCallGraph.getEdge(edge.srcSig, edge.tgtSig.replace(sootClass.getName() +
+							":", subClass.getName() + ":"));
 						e.conditions.addAll(edge.conditions);
 
 						ConditionalCallGraph.addEdge(e);
