@@ -10,22 +10,22 @@ object ConditionalCallGraph {
 
     @JvmStatic
     fun addEdge(edge: Edge) {
-        if (edge.srcSig.isEmpty() || edge.tgtSig.isEmpty()) {
+        if (edge.sourceSig.isEmpty() || edge.targetSig.isEmpty()) {
             return
         }
 
-        if (edge.srcSig == edge.tgtSig) {
+        if (edge.sourceSig == edge.targetSig) {
             return
         }
 
         addEdgeToEdges(edge)
 
-        if (!edge.srcSig.contains("<init>")) {
-            extracted(edge, edge.srcSig)
+        if (!edge.sourceSig.contains("<init>")) {
+            extracted(edge, edge.sourceSig)
         }
 
-        if (!edge.tgtSig.contains("<init>")) {
-            extracted(edge, edge.tgtSig)
+        if (!edge.targetSig.contains("<init>")) {
+            extracted(edge, edge.targetSig)
         }
     }
 
@@ -40,18 +40,18 @@ object ConditionalCallGraph {
         } else {
             methods = HashSet()
         }
-        methods.add(edge.srcSig)
+        methods.add(edge.sourceSig)
         cls2methods[cls] = methods
     }
 
     private fun addEdgeToEdges(edge: Edge) {
-        val tgtEdges = if (tgtMethod2edges.containsKey(edge.tgtSig)) {
-            tgtMethod2edges[edge.tgtSig]
+        val tgtEdges = if (tgtMethod2edges.containsKey(edge.targetSig)) {
+            tgtMethod2edges[edge.targetSig]
         } else {
             HashSet()
         }
         tgtEdges!!.add(edge)
-        tgtMethod2edges[edge.tgtSig] = tgtEdges
+        tgtMethod2edges[edge.targetSig] = tgtEdges
     }
 
     @JvmStatic
@@ -61,8 +61,8 @@ object ConditionalCallGraph {
             return existingEdges[key]
         } else {
             val edge = Edge()
-            edge.srcSig = srcSig
-            edge.tgtSig = tgtSig
+            edge.sourceSig = srcSig
+            edge.targetSig = tgtSig
 
             existingEdges[key] = edge
 
@@ -86,8 +86,8 @@ object ConditionalCallGraph {
                 val methods: Set<String> = cls2methods[cls]!!
                 for (m in methods) {
                     val edge = Edge()
-                    edge.srcSig = method
-                    edge.tgtSig = m
+                    edge.sourceSig = method
+                    edge.targetSig = m
 
                     addEdgeToEdges(edge)
                 }
@@ -117,7 +117,7 @@ object ConditionalCallGraph {
                 conditions.add(e.conditions.toString())
             }
 
-            edges = tgtMethod2edges[e.srcSig]
+            edges = tgtMethod2edges[e.sourceSig]
 
             if (null != edges) {
                 for (edge in edges) {
@@ -150,16 +150,16 @@ object ConditionalCallGraph {
 
     private fun obtainCallStack(callStack: MutableList<String>, arrow: String, edge: Edge) {
         // Circle found, Stop here
-        if (visitedCalls!!.contains(edge.srcSig)) {
+        if (visitedCalls!!.contains(edge.sourceSig)) {
             return
         } else {
-            visitedCalls!!.add(edge.srcSig)
+            visitedCalls!!.add(edge.sourceSig)
         }
 
-        callStack.add("|" + arrow + edge.srcSig + " " + edge.conditions + "\n")
+        callStack.add("|" + arrow + edge.sourceSig + " " + edge.conditions + "\n")
 
-        if (null != tgtMethod2edges[edge.srcSig]) {
-            for (e in tgtMethod2edges[edge.srcSig]!!) {
+        if (null != tgtMethod2edges[edge.sourceSig]) {
+            for (e in tgtMethod2edges[edge.sourceSig]!!) {
                 obtainCallStack(callStack, "--$arrow", e)
             }
         }

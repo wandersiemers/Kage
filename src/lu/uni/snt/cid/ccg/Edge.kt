@@ -2,15 +2,13 @@ package lu.uni.snt.cid.ccg
 
 class Edge {
     @JvmField
-    var srcSig: String = ""
-
+    var sourceSig: String = "" // Sig is short for 'Signature'
     @JvmField
-    var tgtSig: String = ""
-
+    var targetSig: String = "" // Sig is short for 'Signature'
     @JvmField
     var conditions: Set<String> = HashSet()
 
     override fun toString(): String {
-        return "$conditions:$srcSig-->$tgtSig"
+        return "$conditions:$sourceSig-->$targetSig"
     }
 }

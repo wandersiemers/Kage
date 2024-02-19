@@ -69,7 +69,7 @@ public class AndroidSDKVersionChecker {
 					Set<SootClass> subClasses = SootUtils.getAllSubClasses(sootClass);
 
 					for (SootClass subClass : subClasses) {
-						Edge e = ConditionalCallGraph.getEdge(edge.srcSig, edge.tgtSig.replace(sootClass.getName() +
+						Edge e = ConditionalCallGraph.getEdge(edge.sourceSig, edge.targetSig.replace(sootClass.getName() +
 							":", subClass.getName() + ":"));
 						e.conditions.addAll(edge.conditions);
 
