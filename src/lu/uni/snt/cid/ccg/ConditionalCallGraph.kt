@@ -9,7 +9,7 @@ object ConditionalCallGraph {
     private var visitedCalls: MutableSet<String>? = null
 
     @JvmStatic
-	fun addEdge(edge: Edge) {
+    fun addEdge(edge: Edge) {
         if (edge.srcSig.isEmpty() || edge.tgtSig.isEmpty()) {
             return
         }
@@ -62,7 +62,7 @@ object ConditionalCallGraph {
     }
 
     @JvmStatic
-	fun getEdge(srcSig: String, tgtSig: String): Edge? {
+    fun getEdge(srcSig: String, tgtSig: String): Edge? {
         val key = "$srcSig/$tgtSig"
         if (existingEdges.containsKey(key)) {
             return existingEdges[key]
