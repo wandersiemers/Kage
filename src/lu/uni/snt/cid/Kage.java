@@ -53,7 +53,6 @@ public class Kage {
 		}
 
 		//(4) SDK check study (expand constructors)
-		//AndroidSDKVersionChecker.scan(apkPath, androidJars);
 		ConditionalCallGraph.expandConstructors();
 
 		System.out.println("--------------------------------------------------------------------------------------------------------");
