@@ -21,34 +21,27 @@ object ConditionalCallGraph {
         addEdgeToEdges(edge)
 
         if (!edge.srcSig.contains("<init>")) {
-            val cls = MethodSignature(edge.srcSig).cls
-            var methods: MutableSet<String>?
-            if (cls2methods.containsKey(cls)) {
-                methods = cls2methods[cls]
-                if (null == methods) {
-                    methods = HashSet()
-                }
-            } else {
-                methods = HashSet()
-            }
-            methods.add(edge.srcSig)
-            cls2methods[cls] = methods
+            extracted(edge, edge.srcSig)
         }
 
         if (!edge.tgtSig.contains("<init>")) {
-            val cls = MethodSignature(edge.tgtSig).cls
-            var methods: MutableSet<String>?
-            if (cls2methods.containsKey(cls)) {
-                methods = cls2methods[cls]
-                if (null == methods) {
-                    methods = HashSet()
-                }
-            } else {
+            extracted(edge, edge.tgtSig)
+        }
+    }
+
+    private fun extracted(edge: Edge, sig: String) {
+        val cls = MethodSignature(sig).cls
+        var methods: MutableSet<String>?
+        if (cls2methods.containsKey(cls)) {
+            methods = cls2methods[cls]
+            if (null == methods) {
                 methods = HashSet()
             }
-            methods.add(edge.tgtSig)
-            cls2methods[cls] = methods
+        } else {
+            methods = HashSet()
         }
+        methods.add(edge.srcSig)
+        cls2methods[cls] = methods
     }
 
     private fun addEdgeToEdges(edge: Edge) {
@@ -114,13 +107,13 @@ object ConditionalCallGraph {
         val workList: MutableList<Edge> = ArrayList(edges)
         val visitedEdges: MutableSet<Edge> = HashSet()
 
-        while (!workList.isEmpty()) {
+        while (workList.isNotEmpty()) {
             val e = workList.removeAt(0)
             visitedEdges.add(e)
 
             val cond = e.conditions.toString().replace("\\[".toRegex(), "").replace("]".toRegex(), "")
 
-            if (!cond.isEmpty()) {
+            if (cond.isNotEmpty()) {
                 conditions.add(e.conditions.toString())
             }
 
@@ -144,8 +137,7 @@ object ConditionalCallGraph {
 
         val arrow = "> "
 
-        visitedCalls = HashSet()
-        (visitedCalls as HashSet<String>).add(methodSig)
+        visitedCalls = hashSetOf(methodSig)
 
         if (null != tgtMethod2edges[methodSig]) {
             for (e in tgtMethod2edges[methodSig]!!) {
