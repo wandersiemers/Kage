@@ -6,7 +6,7 @@ class Edge {
     @JvmField
     var targetSig: String = "" // Sig is short for 'Signature'
     @JvmField
-    var conditions: Set<String> = HashSet()
+    var conditions = HashSet<String>()
 
     override fun toString(): String {
         return "$conditions:$sourceSig-->$targetSig"
