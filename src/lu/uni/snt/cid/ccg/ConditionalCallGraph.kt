@@ -3,7 +3,7 @@ package lu.uni.snt.cid.ccg
 import lu.uni.snt.cid.utils.MethodSignature
 
 object ConditionalCallGraph {
-    private var tgtMethod2edges: MutableMap<String, MutableSet<Edge>?> = HashMap()
+    private var targetMethod2edges: MutableMap<String, MutableSet<Edge>?> = HashMap()
     private var cls2methods: MutableMap<String, MutableSet<String>> = HashMap()
     private var existingEdges: MutableMap<String, Edge> = HashMap()
     private var visitedCalls: MutableSet<String>? = null
@@ -45,13 +45,13 @@ object ConditionalCallGraph {
     }
 
     private fun addEdgeToEdges(edge: Edge) {
-        val tgtEdges = if (tgtMethod2edges.containsKey(edge.targetSig)) {
-            tgtMethod2edges[edge.targetSig]
+        val tgtEdges = if (targetMethod2edges.containsKey(edge.targetSig)) {
+            targetMethod2edges[edge.targetSig]
         } else {
             HashSet()
         }
         tgtEdges!!.add(edge)
-        tgtMethod2edges[edge.targetSig] = tgtEdges
+        targetMethod2edges[edge.targetSig] = tgtEdges
     }
 
     @JvmStatic
@@ -73,7 +73,7 @@ object ConditionalCallGraph {
     fun expandConstructors() {
         val initMethods: MutableSet<String> = HashSet()
 
-        for (method in tgtMethod2edges.keys) {
+        for (method in targetMethod2edges.keys) {
             if (method.contains("<init>")) {
                 initMethods.add(method)
             }
@@ -98,11 +98,11 @@ object ConditionalCallGraph {
     fun obtainConditions(methodSig: String): List<String> {
         val conditions: MutableList<String> = ArrayList()
 
-        if (!tgtMethod2edges.containsKey(methodSig)) {
+        if (!targetMethod2edges.containsKey(methodSig)) {
             return conditions
         }
 
-        var edges: Set<Edge>? = tgtMethod2edges[methodSig]
+        var edges: Set<Edge>? = targetMethod2edges[methodSig]
 
         val workList: MutableList<Edge> = ArrayList(edges)
         val visitedEdges: MutableSet<Edge> = HashSet()
@@ -117,7 +117,7 @@ object ConditionalCallGraph {
                 conditions.add(e.conditions.toString())
             }
 
-            edges = tgtMethod2edges[e.sourceSig]
+            edges = targetMethod2edges[e.sourceSig]
 
             if (null != edges) {
                 for (edge in edges) {
@@ -139,8 +139,8 @@ object ConditionalCallGraph {
 
         visitedCalls = hashSetOf(methodSig)
 
-        if (null != tgtMethod2edges[methodSig]) {
-            for (e in tgtMethod2edges[methodSig]!!) {
+        if (null != targetMethod2edges[methodSig]) {
+            for (e in targetMethod2edges[methodSig]!!) {
                 obtainCallStack(callStack, "--$arrow", e)
             }
         }
@@ -158,8 +158,8 @@ object ConditionalCallGraph {
 
         callStack.add("|" + arrow + edge.sourceSig + " " + edge.conditions + "\n")
 
-        if (null != tgtMethod2edges[edge.sourceSig]) {
-            for (e in tgtMethod2edges[edge.sourceSig]!!) {
+        if (null != targetMethod2edges[edge.sourceSig]) {
+            for (e in targetMethod2edges[edge.sourceSig]!!) {
                 obtainCallStack(callStack, "--$arrow", e)
             }
         }
