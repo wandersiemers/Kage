@@ -27,12 +27,12 @@ public class APIExtractor
 		String[] args =
         {
 			"-process-dir", apkOrDexPath,
-            "-ire",
-			"-pp",
+            "-ignore-resolution-errors",
+			"-prepend-classpath",
 			"-keep-line-number",
 			"-allow-phantom-refs",
-			"-w",
-			"-p", "cg", "enabled:false",
+			"-whole-program",
+			"-phase-option", "cg", "enabled:false",
 			"-src-prec", "apk"
         };
 			
