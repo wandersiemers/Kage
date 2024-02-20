@@ -4,8 +4,8 @@ public class MethodSignature
 {
 	private String signature = "";
 	
-	private String pkg;
-	private String cls;
+	private String pkg; // Package
+	private String cls; // Class
 	private String methodName;
 	private String returnType;
 	

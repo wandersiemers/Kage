@@ -18,18 +18,18 @@ object ConditionalCallGraph {
             return
         }
 
-        addEdgeToEdges(edge)
+        addEdgeToGraph(edge)
 
         if (!edge.sourceSig.contains("<init>")) {
-            extracted(edge, edge.sourceSig)
+            storeMethod(edge, edge.sourceSig)
         }
 
         if (!edge.targetSig.contains("<init>")) {
-            extracted(edge, edge.targetSig)
+            storeMethod(edge, edge.targetSig)
         }
     }
 
-    private fun extracted(edge: Edge, sig: String) {
+    private fun storeMethod(edge: Edge, sig: String) {
         val cls = MethodSignature(sig).cls
         var methods: MutableSet<String>?
         if (cls2methods.containsKey(cls)) {
@@ -44,7 +44,7 @@ object ConditionalCallGraph {
         cls2methods[cls] = methods
     }
 
-    private fun addEdgeToEdges(edge: Edge) {
+    private fun addEdgeToGraph(edge: Edge) {
         val tgtEdges = if (targetMethod2edges.containsKey(edge.targetSig)) {
             targetMethod2edges[edge.targetSig]
         } else {
@@ -89,7 +89,7 @@ object ConditionalCallGraph {
                     edge.sourceSig = method
                     edge.targetSig = m
 
-                    addEdgeToEdges(edge)
+                    addEdgeToGraph(edge)
                 }
             }
         }
