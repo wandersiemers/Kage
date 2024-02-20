@@ -36,7 +36,7 @@ object Kage {
         val manifest = AndroidManifest(Config.apkName)
         val apiLevel = inferAPILevel(manifest)
 
-        //(3) Extracting the leveraged Android APIs (primary and all)
+        //(3) Extracting the leveraged Android APIs (primary (in Dex) and all (in additional libraries etc))
         val extractor = APIExtractor()
         extractor.transform(apkPath, androidJars, apiLevel)
         println("Found " + additionalDexes.size + " additional DEX files. Now visiting them one by one.")
