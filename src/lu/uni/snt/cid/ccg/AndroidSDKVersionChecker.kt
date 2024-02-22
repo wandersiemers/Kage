@@ -81,16 +81,11 @@ object AndroidSDKVersionChecker {
 
         if (sdkChecker) {
             if (stmt is IfStmt) {
-                val ifStmt = stmt
-                val targetStmt = ifStmt.target
+                traverse(b, graph, stmt.target, sdkIntValues, conditions.plus(stmt.condition.toString()), visitedUnits)
 
-                val positiveConditions: MutableSet<String?> = HashSet(conditions)
-                positiveConditions.add(ifStmt.condition.toString())
-                traverse(b, graph, targetStmt, sdkIntValues, positiveConditions, visitedUnits)
-
-                succUnits.remove(targetStmt)
-                val negativeConditions: MutableSet<String?> = HashSet(conditions)
-                negativeConditions.add("-" + ifStmt.condition.toString())
+                succUnits.remove(stmt.target)
+                val negativeConditions = HashSet(conditions)
+                negativeConditions.add("-${stmt.condition}")
                 for (u in succUnits) {
                     traverse(b, graph, u, sdkIntValues, negativeConditions, visitedUnits)
                 }
