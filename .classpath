@@ -7,6 +7,6 @@
 	<classpathentry kind="lib" path="libs/AXMLPrinter2.jar"/>
 	<classpathentry kind="lib" path="libs/jdom-2.0.5.jar"/>
 	<classpathentry kind="lib" path="libs/commons-io-2.5.jar"/>
-	<classpathentry kind="lib" path="libs/soot-trunk.jar"/>
+	<classpathentry kind="lib" path="libs/soot-4.4.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
