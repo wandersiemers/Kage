@@ -4,8 +4,9 @@ import lu.uni.snt.cid.Config
 import lu.uni.snt.cid.ccg.ConditionalCallGraph.addEdge
 import lu.uni.snt.cid.ccg.ConditionalCallGraph.getEdge
 import lu.uni.snt.cid.utils.SootUtils
-import soot.*
+import soot.Body
 import soot.Unit
+import soot.Value
 import soot.jimple.*
 import soot.toolkits.graph.ExceptionalUnitGraph
 
@@ -78,7 +79,14 @@ object AndroidSDKVersionChecker {
 
         if (sdkChecker) {
             if (stmt is IfStmt) {
-                traverse(body, graph, stmt.target, sdkIntValues, conditions.plus(stmt.condition.toString()), visitedUnits)
+                traverse(
+                    body,
+                    graph,
+                    stmt.target,
+                    sdkIntValues,
+                    conditions.plus(stmt.condition.toString()),
+                    visitedUnits
+                )
 
                 succUnits.remove(stmt.target)
                 val negativeConditions = HashSet(conditions)
