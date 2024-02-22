@@ -11,14 +11,13 @@ import soot.toolkits.graph.ExceptionalUnitGraph
 
 object AndroidSDKVersionChecker {
     @JvmStatic
-	fun scan(b: Body) {
+    fun scan(b: Body) {
         if (!b.method.declaringClass.name.startsWith("android.support")) {
             if (b.toString().contains(Config.FIELD_VERSION_SDK_INT)) {
                 Config.containsSDKVersionChecker = true
             }
 
             val graph = ExceptionalUnitGraph(b)
-
             for (unit in graph.heads) {
                 traverse(b, graph, unit, HashSet(), HashSet(), HashSet())
             }
@@ -48,13 +47,11 @@ object AndroidSDKVersionChecker {
             if (stmt.containsInvokeExpr()) {
                 if (handleInvokeExpr(b, stmt, conditions)) continue
                 if (handleInvokeAnimatorsEnabledExpr(b, stmt, conditions)) continue
-
             }
 
             if (stmt is IfStmt) {
                 sdkChecker = handleIfStmtAnimations(stmt)
                 sdkChecker = handleIfStmt(stmt, sdkIntValues, sdkChecker)
-
             }
 
             succUnits = graph.getSuccsOf(stmt)
@@ -144,7 +141,6 @@ object AndroidSDKVersionChecker {
         }
         return false
     }
-
 
 
     private fun handleInvokeExpr(
