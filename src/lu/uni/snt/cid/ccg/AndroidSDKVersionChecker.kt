@@ -11,21 +11,21 @@ import soot.toolkits.graph.ExceptionalUnitGraph
 
 object AndroidSDKVersionChecker {
     @JvmStatic
-    fun scan(b: Body) {
-        if (!b.method.declaringClass.name.startsWith("android.support")) {
-            if (b.toString().contains(Config.FIELD_VERSION_SDK_INT)) {
+    fun scan(body: Body) {
+        if (!body.method.declaringClass.name.startsWith("android.support")) {
+            if (body.toString().contains(Config.FIELD_VERSION_SDK_INT)) {
                 Config.containsSDKVersionChecker = true
             }
 
-            val graph = ExceptionalUnitGraph(b)
+            val graph = ExceptionalUnitGraph(body)
             for (unit in graph.heads) {
-                traverse(b, graph, unit, HashSet(), HashSet(), HashSet())
+                traverse(body, graph, unit, HashSet(), HashSet(), HashSet())
             }
         }
     }
 
     private fun traverse(
-        b: Body, graph: ExceptionalUnitGraph, unit: Unit, sdkIntValues: MutableSet<Value?>,
+        body: Body, graph: ExceptionalUnitGraph, unit: Unit, sdkIntValues: MutableSet<Value?>,
         conditions: Set<String?>, visitedUnits: MutableSet<Unit?>
     ) {
         if (visitedUnits.contains(unit)) {
@@ -45,8 +45,8 @@ object AndroidSDKVersionChecker {
             }
 
             if (stmt.containsInvokeExpr()) {
-                if (handleInvokeExpr(b, stmt, conditions)) continue
-                if (handleInvokeAnimatorsEnabledExpr(b, stmt, conditions)) continue
+                if (handleInvokeExpr(body, stmt, conditions)) continue
+                if (handleInvokeAnimatorsEnabledExpr(body, stmt, conditions)) continue
             }
 
             if (stmt is IfStmt) {
@@ -78,18 +78,18 @@ object AndroidSDKVersionChecker {
 
         if (sdkChecker) {
             if (stmt is IfStmt) {
-                traverse(b, graph, stmt.target, sdkIntValues, conditions.plus(stmt.condition.toString()), visitedUnits)
+                traverse(body, graph, stmt.target, sdkIntValues, conditions.plus(stmt.condition.toString()), visitedUnits)
 
                 succUnits.remove(stmt.target)
                 val negativeConditions = HashSet(conditions)
                 negativeConditions.add("-${stmt.condition}")
                 for (u in succUnits) {
-                    traverse(b, graph, u, sdkIntValues, negativeConditions, visitedUnits)
+                    traverse(body, graph, u, sdkIntValues, negativeConditions, visitedUnits)
                 }
             }
         } else {
             for (u in succUnits) {
-                traverse(b, graph, u, sdkIntValues, conditions, visitedUnits)
+                traverse(body, graph, u, sdkIntValues, conditions, visitedUnits)
             }
         }
     }
@@ -144,12 +144,12 @@ object AndroidSDKVersionChecker {
 
 
     private fun handleInvokeExpr(
-        b: Body,
+        body: Body,
         stmt: Stmt,
         conditions: Set<String?>
     ): Boolean {
         val edge = getEdge(
-            b.method.signature,
+            body.method.signature,
             stmt.invokeExpr.method.signature
         )
         edge!!.conditions.add(conditions.toString())
