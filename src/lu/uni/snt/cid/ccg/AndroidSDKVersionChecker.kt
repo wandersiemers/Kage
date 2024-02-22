@@ -141,8 +141,7 @@ object AndroidSDKVersionChecker {
         }
         return false
     }
-
-
+    
     private fun handleInvokeExpr(
         body: Body,
         stmt: Stmt,
@@ -177,6 +176,7 @@ object AndroidSDKVersionChecker {
                 addEdge(e)
             }
         }
+
         return false
     }
 
@@ -192,7 +192,6 @@ object AndroidSDKVersionChecker {
         if (stmt.invokeExpr.method.signature.contains("encrypted", true)) {
             println("invoked encrypted check, sig ${stmt.invokeExpr.method.signature}")
         }
-
 
         if (stmt.invokeExpr is InterfaceInvokeExpr) {
             val sootMethod = stmt.invokeExpr.method
