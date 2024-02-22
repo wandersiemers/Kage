@@ -175,13 +175,13 @@ object AndroidSDKVersionChecker {
             val subClasses = SootUtils.getAllSubClasses(sootClass)
 
             for (subClass in subClasses) {
-                val e = getEdge(
+                val subclassEdge = getEdge(
                     edge.sourceSig,
                     edge.targetSig.replace(sootClass.name + ":", subClass.name + ":")
                 )
 
-                e!!.conditions.addAll(edge.conditions)
-                addEdge(e)
+                subclassEdge!!.conditions.addAll(edge.conditions)
+                addEdge(subclassEdge)
             }
         }
 
@@ -214,13 +214,13 @@ object AndroidSDKVersionChecker {
             val subClasses = SootUtils.getAllSubClasses(sootClass)
 
             for (subClass in subClasses) {
-                val e = getEdge(
+                val subclassEdge = getEdge(
                     edge.sourceSig,
                     edge.targetSig.replace(sootClass.name + ":", subClass.name + ":")
                 )
 
-                e!!.conditions.addAll(edge.conditions)
-                addEdge(e)
+                subclassEdge!!.conditions.addAll(edge.conditions)
+                addEdge(subclassEdge)
             }
         }
 
