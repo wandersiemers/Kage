@@ -72,7 +72,7 @@ object AndroidSDKVersionChecker {
                     visitedUnits.add(stmt)
                 }
             } else if (succUnits.isEmpty()) {
-                //It's a return statement
+                // It's a return statement
                 return
             } else {
                 break
@@ -108,7 +108,7 @@ object AndroidSDKVersionChecker {
         if (stmt.toString().contains(Config.FIELD_VERSION_SDK_INT)) {
             sdkIntValues.add(leftOp)
         } else {
-            //Remove killed references
+            // Remove killed references
             sdkIntValues.remove(leftOp)
         }
     }
@@ -120,7 +120,7 @@ object AndroidSDKVersionChecker {
             println("found animators enabled check in full statement $stmt")
             animationValues.add(leftOp)
         } else {
-            //Remove killed references
+            // Remove killed references
             animationValues.remove(leftOp)
         }
     }
