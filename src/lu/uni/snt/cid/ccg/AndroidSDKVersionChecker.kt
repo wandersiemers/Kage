@@ -27,8 +27,8 @@ object AndroidSDKVersionChecker {
 
     private fun traverse(
         body: Body, graph: ExceptionalUnitGraph, unit: Unit, sdkIntValues: MutableSet<Value?> = HashSet(),
-        conditions: Set<String?> = HashSet(), animationChecked: Boolean = false, visitedUnits: MutableSet<Unit?> =
-            HashSet()
+        visitedUnits: MutableSet<Unit?> =
+            HashSet(), conditions: Set<String?> = HashSet(), animationChecked: Boolean = false
     ) {
         if (visitedUnits.contains(unit)) {
             return
@@ -86,21 +86,21 @@ object AndroidSDKVersionChecker {
                     graph,
                     stmt.target,
                     sdkIntValues,
+                    visitedUnits,
                     conditions.plus(stmt.condition.toString()),
-                    animationChecked,
-                    visitedUnits
+                    animationChecked
                 )
 
                 succUnits.remove(stmt.target)
                 val negativeConditions = HashSet(conditions)
                 negativeConditions.add("-${stmt.condition}")
                 for (u in succUnits) {
-                    traverse(body, graph, u, sdkIntValues, negativeConditions, animationChecked, visitedUnits)
+                    traverse(body, graph, u, sdkIntValues, visitedUnits, negativeConditions, animationChecked)
                 }
             }
         } else {
             for (u in succUnits) {
-                traverse(body, graph, u, sdkIntValues, conditions, animationChecked, visitedUnits)
+                traverse(body, graph, u, sdkIntValues, visitedUnits, conditions, animationChecked)
             }
         }
 
@@ -111,16 +111,16 @@ object AndroidSDKVersionChecker {
                     graph,
                     stmt.target,
                     sdkIntValues,
+                    visitedUnits,
                     conditions.plus(stmt.condition.toString()),
-                    true,
-                    visitedUnits
+                    true
                 )
 
                 succUnits.remove(stmt.target)
                 val negativeConditions = HashSet(conditions)
                 negativeConditions.add("-${stmt.condition}")
                 for (u in succUnits) {
-                    traverse(body, graph, u, sdkIntValues, negativeConditions, true, visitedUnits)
+                    traverse(body, graph, u, sdkIntValues, visitedUnits, negativeConditions, true)
                 }
             }
         }
