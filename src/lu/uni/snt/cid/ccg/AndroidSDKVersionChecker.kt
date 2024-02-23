@@ -37,7 +37,8 @@ object AndroidSDKVersionChecker {
 
         var succUnits: MutableList<Unit>
         var stmt = unit as Stmt
-        var sdkChecker = false
+        var isSDKCheckIfStmt = false
+        var isAnimationEnabledIfStmt = false
 
         while (true) {
             if (stmt is AssignStmt) {
@@ -51,8 +52,8 @@ object AndroidSDKVersionChecker {
             }
 
             if (stmt is IfStmt) {
-                sdkChecker = handleIfStmtAnimations(stmt)
-                sdkChecker = handleIfStmt(stmt, sdkIntValues, sdkChecker)
+                isAnimationEnabledIfStmt = handleIfStmtAnimations(stmt)
+                isSDKCheckIfStmt = handleIfStmt(stmt, sdkIntValues, isSDKCheckIfStmt)
             }
 
             succUnits = graph.getSuccsOf(stmt)
@@ -77,7 +78,7 @@ object AndroidSDKVersionChecker {
             }
         }
 
-        if (sdkChecker) {
+        if (isSDKCheckIfStmt) {
             if (stmt is IfStmt) {
                 traverse(
                     body,
