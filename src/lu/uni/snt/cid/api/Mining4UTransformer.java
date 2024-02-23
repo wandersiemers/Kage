@@ -11,8 +11,8 @@ import soot.util.Chain;
 import java.util.*;
 
 public class Mining4UTransformer extends SceneTransformer {
-	public Set<String> accessedAndroidAPIs = new HashSet<String>();
-	public Map<String, Set<String>> api2callers = new HashMap<String, Set<String>>();
+	public Set<String> accessedAndroidAPIs = new HashSet<>();
+	public Map<String, Set<String>> api2callers = new HashMap<>();
 
 	private void extract(Body b) {
 		String callerMethodSig = b.getMethod().getSignature();
@@ -70,8 +70,7 @@ public class Mining4UTransformer extends SceneTransformer {
 
 			List<SootMethod> methods = sc.getMethods();
 
-			for (int i = 0; i < methods.size(); i++) {
-				SootMethod sm = methods.get(i);
+			for (SootMethod sm : methods) {
 				Body body = null;
 				try {
 					body = sm.retrieveActiveBody();
@@ -84,6 +83,5 @@ public class Mining4UTransformer extends SceneTransformer {
 					internalBodyTransform(body);
 			}
 		}
-
 	}
 }
