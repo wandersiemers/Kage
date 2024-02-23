@@ -183,7 +183,7 @@ object AndroidSDKVersionChecker {
             body.method.signature,
             stmt.invokeExpr.method.signature
         )
-        edge!!.conditions.add(conditions.toString())
+        edge.conditions.add(conditions.toString())
 
         addEdge(edge)
 
@@ -204,7 +204,7 @@ object AndroidSDKVersionChecker {
                     edge.targetSig.replace(sootClass.name + ":", subClass.name + ":")
                 )
 
-                subclassEdge!!.conditions.addAll(edge.conditions)
+                subclassEdge.conditions.addAll(edge.conditions)
                 addEdge(subclassEdge)
             }
         }
@@ -217,7 +217,7 @@ object AndroidSDKVersionChecker {
             body.method.signature,
             stmt.invokeExpr.method.signature
         )
-        edge!!.conditions.add(conditions.toString())
+        edge.conditions.add(conditions.toString())
 
         addEdge(edge)
 
@@ -243,7 +243,7 @@ object AndroidSDKVersionChecker {
                     edge.targetSig.replace(sootClass.name + ":", subClass.name + ":")
                 )
 
-                subclassEdge!!.conditions.addAll(edge.conditions)
+                subclassEdge.conditions.addAll(edge.conditions)
                 addEdge(subclassEdge)
             }
         }
