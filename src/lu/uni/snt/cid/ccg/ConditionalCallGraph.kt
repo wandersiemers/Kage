@@ -2,69 +2,54 @@ package lu.uni.snt.cid.ccg
 
 import lu.uni.snt.cid.utils.MethodSignature
 
+private const val initSignature = "<init>"
+
 object ConditionalCallGraph {
     private var targetMethod2edges: MutableMap<String, MutableSet<Edge>?> = HashMap()
     private var cls2methods: MutableMap<String, MutableSet<String>> = HashMap()
-    private var existingEdges: MutableMap<String, Edge> = HashMap()
+    private var cachedEdges: MutableMap<String, Edge> = HashMap()
     private var visitedCalls: MutableSet<String>? = null
 
     @JvmStatic
     fun addEdge(edge: Edge) {
-        if (edge.sourceSig.isEmpty() || edge.targetSig.isEmpty()) {
-            return
-        }
-
-        if (edge.sourceSig == edge.targetSig) {
+        if (edge.sourceSig.isEmpty() || edge.targetSig.isEmpty() || (edge.sourceSig == edge.targetSig)) {
             return
         }
 
         addEdgeToGraph(edge)
 
-        if (!edge.sourceSig.contains("<init>")) {
+        if (!edge.sourceSig.contains(initSignature)) {
             storeMethod(edge, edge.sourceSig)
         }
 
-        if (!edge.targetSig.contains("<init>")) {
+        if (!edge.targetSig.contains(initSignature)) {
             storeMethod(edge, edge.targetSig)
         }
     }
 
     private fun storeMethod(edge: Edge, sig: String) {
-        val cls = MethodSignature(sig).cls
-        var methods: MutableSet<String>?
-        if (cls2methods.containsKey(cls)) {
-            methods = cls2methods[cls]
-            if (null == methods) {
-                methods = HashSet()
-            }
-        } else {
-            methods = HashSet()
-        }
-        methods.add(edge.sourceSig)
-        cls2methods[cls] = methods
+        cls2methods[MethodSignature(sig).cls]?.add(edge.sourceSig)
     }
 
     private fun addEdgeToGraph(edge: Edge) {
-        val tgtEdges = if (targetMethod2edges.containsKey(edge.targetSig)) {
-            targetMethod2edges[edge.targetSig]
-        } else {
-            HashSet()
-        }
-        tgtEdges!!.add(edge)
+        val tgtEdges = (targetMethod2edges[edge.targetSig] ?: HashSet())
+        tgtEdges.add(edge)
         targetMethod2edges[edge.targetSig] = tgtEdges
     }
 
     @JvmStatic
-    fun getEdge(srcSig: String, tgtSig: String): Edge? {
+    fun getEdge(srcSig: String, tgtSig: String): Edge {
         val key = "$srcSig/$tgtSig"
-        if (existingEdges.containsKey(key)) {
-            return existingEdges[key]
+        val cachedEdge = cachedEdges[key]
+
+        if (cachedEdge != null) {
+            return cachedEdge
         } else {
             val edge = Edge()
             edge.sourceSig = srcSig
             edge.targetSig = tgtSig
 
-            existingEdges[key] = edge
+            cachedEdges[key] = edge
 
             return edge
         }
@@ -74,7 +59,7 @@ object ConditionalCallGraph {
         val initMethods: MutableSet<String> = HashSet()
 
         for (method in targetMethod2edges.keys) {
-            if (method.contains("<init>")) {
+            if (method.contains(initSignature)) {
                 initMethods.add(method)
             }
         }
