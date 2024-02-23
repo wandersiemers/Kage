@@ -20,14 +20,15 @@ object AndroidSDKVersionChecker {
 
             val graph = ExceptionalUnitGraph(body)
             for (unit in graph.heads) {
-                traverse(body, graph, unit, HashSet(), HashSet(), false, HashSet())
+                traverse(body, graph, unit)
             }
         }
     }
 
     private fun traverse(
-        body: Body, graph: ExceptionalUnitGraph, unit: Unit, sdkIntValues: MutableSet<Value?>,
-        conditions: Set<String?>, animationChecked: Boolean, visitedUnits: MutableSet<Unit?>
+        body: Body, graph: ExceptionalUnitGraph, unit: Unit, sdkIntValues: MutableSet<Value?> = HashSet(),
+        conditions: Set<String?> = HashSet(), animationChecked: Boolean = false, visitedUnits: MutableSet<Unit?> =
+            HashSet()
     ) {
         if (visitedUnits.contains(unit)) {
             return
