@@ -67,12 +67,15 @@ object AndroidSDKVersionChecker {
                 }
 
                 if (visitedUnits.contains(stmt)) {
+                    // Return: we've already seen this statement, so we're in
+                    // some sort of cycle
                     return
                 } else {
                     visitedUnits.add(stmt)
                 }
             } else if (succUnits.isEmpty()) {
-                // It's a return statement
+                // According to CiD folks, the statement we found is a return statement
+                // Seems to conflict with the earlier `if (stmt is ReturnStmt)` check, though
                 return
             } else {
                 break
