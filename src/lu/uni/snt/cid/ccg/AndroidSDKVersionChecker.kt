@@ -58,8 +58,8 @@ object AndroidSDKVersionChecker {
             }
 
             if (stmt is IfStmt) {
-                isAnimationEnabledIfStmt = handleIfStmtAnimations(stmt)
-                isSDKCheckIfStmt = handleIfStmt(stmt, sdkValues, isSDKCheckIfStmt)
+                isAnimationEnabledIfStmt = isAnimationCheck(stmt)
+                isSDKCheckIfStmt = isSDKCheck(stmt, sdkValues, isSDKCheckIfStmt)
             }
 
             succUnits = graph.getSuccsOf(stmt)
@@ -138,7 +138,7 @@ object AndroidSDKVersionChecker {
         }
     }
 
-    private fun handleIfStmt(stmt: IfStmt, sdkIntValues: MutableSet<Value?>, sdkChecker: Boolean): Boolean {
+    private fun isSDKCheck(stmt: IfStmt, sdkIntValues: MutableSet<Value?>, sdkChecker: Boolean): Boolean {
         var sdkChecker1 = sdkChecker
         for (vb in stmt.condition.useBoxes) {
             if (sdkIntValues.contains(vb.value)) {
@@ -149,7 +149,7 @@ object AndroidSDKVersionChecker {
         return sdkChecker1
     }
 
-    private fun handleIfStmtAnimations(stmt: IfStmt): Boolean {
+    private fun isAnimationCheck(stmt: IfStmt): Boolean {
         if (stmt.toString().contains("areAnimatorsEnabled", true)) {
             println("found animators enabled check in if stmt  ${stmt.condition}")
             return true
