@@ -141,7 +141,6 @@ object AndroidSDKVersionChecker {
             animationEnabledProxies.add(leftOp)
         } else {
             // Remove killed references
-            println("removing killed reference in stmt $stmt")
             animationEnabledProxies.remove(leftOp)
         }
     }
