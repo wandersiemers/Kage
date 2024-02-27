@@ -26,9 +26,14 @@ object AndroidSDKVersionChecker {
     }
 
     private fun traverse(
-        body: Body, graph: ExceptionalUnitGraph, unit: Unit, sdkIntValues: MutableSet<Value?> = HashSet(),
-        visitedUnits: MutableSet<Unit?> =
-            HashSet(), conditions: Set<String?> = HashSet(), animationChecked: Boolean = false
+        body: Body,
+        graph: ExceptionalUnitGraph,
+        unit: Unit,
+        sdkValues: MutableSet<Value?> = HashSet(),
+        animationEnabledProxies: MutableSet<Value> = HashSet(),
+        visitedUnits: MutableSet<Unit?> = HashSet(),
+        conditions: Set<String?> = HashSet(),
+        animationChecked: Boolean = false
     ) {
         if (visitedUnits.contains(unit)) {
             return
@@ -43,7 +48,7 @@ object AndroidSDKVersionChecker {
 
         while (true) {
             if (stmt is AssignStmt) {
-                handleAssignStmt(stmt, sdkIntValues)
+                handleAssignStmt(stmt, sdkValues)
                 handleAnimationAssignStmt(stmt, HashSet())
             }
 
@@ -54,7 +59,7 @@ object AndroidSDKVersionChecker {
 
             if (stmt is IfStmt) {
                 isAnimationEnabledIfStmt = handleIfStmtAnimations(stmt)
-                isSDKCheckIfStmt = handleIfStmt(stmt, sdkIntValues, isSDKCheckIfStmt)
+                isSDKCheckIfStmt = handleIfStmt(stmt, sdkValues, isSDKCheckIfStmt)
             }
 
             succUnits = graph.getSuccsOf(stmt)
@@ -82,48 +87,36 @@ object AndroidSDKVersionChecker {
             }
         }
 
+        fun innerTraverse(unit: Unit, conditions: Set<String?>, animationChecked: Boolean = false) {
+            traverse(body, graph, unit, sdkValues, animationEnabledProxies, visitedUnits, conditions, animationChecked)
+        }
+
         if (isSDKCheckIfStmt) {
             if (stmt is IfStmt) {
-                traverse(
-                    body,
-                    graph,
-                    stmt.target,
-                    sdkIntValues,
-                    visitedUnits,
-                    conditions.plus(stmt.condition.toString()),
-                    animationChecked
-                )
+                innerTraverse(stmt.target, conditions.plus(stmt.condition.toString()), animationChecked)
 
                 succUnits.remove(stmt.target)
                 val negativeConditions = HashSet(conditions)
                 negativeConditions.add("-${stmt.condition}")
                 for (u in succUnits) {
-                    traverse(body, graph, u, sdkIntValues, visitedUnits, negativeConditions, animationChecked)
+                    innerTraverse(u, negativeConditions, animationChecked)
                 }
             }
         } else {
             for (u in succUnits) {
-                traverse(body, graph, u, sdkIntValues, visitedUnits, conditions, animationChecked)
+                innerTraverse(u, conditions, animationChecked)
             }
         }
 
         if (isAnimationEnabledIfStmt) {
             if (stmt is IfStmt) {
-                traverse(
-                    body,
-                    graph,
-                    stmt.target,
-                    sdkIntValues,
-                    visitedUnits,
-                    conditions.plus(stmt.condition.toString()),
-                    true
-                )
+                innerTraverse(stmt.target, conditions.plus(stmt.condition.toString()), true)
 
                 succUnits.remove(stmt.target)
                 val negativeConditions = HashSet(conditions)
                 negativeConditions.add("-${stmt.condition}")
                 for (u in succUnits) {
-                    traverse(body, graph, u, sdkIntValues, visitedUnits, negativeConditions, true)
+                    innerTraverse(u, negativeConditions, true)
                 }
             }
         }
@@ -140,23 +133,20 @@ object AndroidSDKVersionChecker {
         }
     }
 
-    private fun handleAnimationAssignStmt(stmt: AssignStmt, animationValues: MutableSet<Value?>) {
+    private fun handleAnimationAssignStmt(stmt: AssignStmt, animationEnabledProxies: MutableSet<Value?>) {
         val leftOp = stmt.leftOp
 
         if (stmt.toString().contains("areAnimatorsEnabled")) {
             println("found animators enabled check in full statement $stmt")
-            animationValues.add(leftOp)
+            animationEnabledProxies.add(leftOp)
         } else {
             // Remove killed references
-            animationValues.remove(leftOp)
+            println("removing killed reference in stmt $stmt")
+            animationEnabledProxies.remove(leftOp)
         }
     }
 
-    private fun handleIfStmt(
-        stmt: IfStmt,
-        sdkIntValues: MutableSet<Value?>,
-        sdkChecker: Boolean
-    ): Boolean {
+    private fun handleIfStmt(stmt: IfStmt, sdkIntValues: MutableSet<Value?>, sdkChecker: Boolean): Boolean {
         var sdkChecker1 = sdkChecker
         for (vb in stmt.condition.useBoxes) {
             if (sdkIntValues.contains(vb.value)) {
@@ -167,9 +157,7 @@ object AndroidSDKVersionChecker {
         return sdkChecker1
     }
 
-    private fun handleIfStmtAnimations(
-        stmt: IfStmt,
-    ): Boolean {
+    private fun handleIfStmtAnimations(stmt: IfStmt): Boolean {
         if (stmt.toString().contains("areAnimatorsEnabled", true)) {
             println("found animators enabled check in if stmt  ${stmt.condition}")
             return true
@@ -177,15 +165,8 @@ object AndroidSDKVersionChecker {
         return false
     }
 
-    private fun handleInvokeExpr(
-        body: Body,
-        stmt: Stmt,
-        conditions: Set<String?>
-    ): Boolean {
-        val edge = getEdge(
-            body.method.signature,
-            stmt.invokeExpr.method.signature
-        )
+    private fun handleInvokeExpr(body: Body, stmt: Stmt, conditions: Set<String?>): Boolean {
+        val edge = getEdge(body.method.signature, stmt.invokeExpr.method.signature)
         edge.conditions.add(conditions.toString())
 
         addEdge(edge)
@@ -203,8 +184,7 @@ object AndroidSDKVersionChecker {
 
             for (subClass in subClasses) {
                 val subclassEdge = getEdge(
-                    edge.sourceSig,
-                    edge.targetSig.replace(sootClass.name + ":", subClass.name + ":")
+                    edge.sourceSig, edge.targetSig.replace(sootClass.name + ":", subClass.name + ":")
                 )
 
                 subclassEdge.conditions.addAll(edge.conditions)
@@ -216,10 +196,7 @@ object AndroidSDKVersionChecker {
     }
 
     private fun handleInvokeAnimatorsEnabledExpr(body: Body, stmt: Stmt, conditions: Set<String?>): Boolean {
-        val edge = getEdge(
-            body.method.signature,
-            stmt.invokeExpr.method.signature
-        )
+        val edge = getEdge(body.method.signature, stmt.invokeExpr.method.signature)
         edge.conditions.add(conditions.toString())
 
         addEdge(edge)
@@ -238,8 +215,7 @@ object AndroidSDKVersionChecker {
 
             for (subClass in subClasses) {
                 val subclassEdge = getEdge(
-                    edge.sourceSig,
-                    edge.targetSig.replace(sootClass.name + ":", subClass.name + ":")
+                    edge.sourceSig, edge.targetSig.replace(sootClass.name + ":", subClass.name + ":")
                 )
 
                 subclassEdge.conditions.addAll(edge.conditions)
