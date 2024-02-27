@@ -91,32 +91,30 @@ object AndroidSDKVersionChecker {
             traverse(body, graph, unit, sdkValues, animationEnabledProxies, visitedUnits, conditions, animationChecked)
         }
 
-        if (isSDKCheckIfStmt) {
-            if (stmt is IfStmt) {
-                innerTraverse(stmt.target, conditions.plus(stmt.condition.toString()), animationChecked)
+        fun handleCheckingIfStmt(
+            stmt: IfStmt,
+            conditions: Set<String?>,
+            succUnits: MutableList<Unit>,
+            animation: Boolean,
+        ) {
+            innerTraverse(stmt.target, conditions.plus(stmt.condition.toString()), animation)
 
-                succUnits.remove(stmt.target)
-                val negativeConditions = HashSet(conditions)
-                negativeConditions.add("-${stmt.condition}")
-                for (u in succUnits) {
-                    innerTraverse(u, negativeConditions, animationChecked)
-                }
-            }
-        } else {
+            succUnits.remove(stmt.target)
+            val negativeConditions = HashSet(conditions)
+            negativeConditions.add("-${stmt.condition}")
             for (u in succUnits) {
-                innerTraverse(u, conditions, animationChecked)
+                innerTraverse(u, negativeConditions, animation)
             }
         }
 
-        if (isAnimationEnabledIfStmt) {
-            if (stmt is IfStmt) {
-                innerTraverse(stmt.target, conditions.plus(stmt.condition.toString()), true)
-
-                succUnits.remove(stmt.target)
-                val negativeConditions = HashSet(conditions)
-                negativeConditions.add("-${stmt.condition}")
+        if (stmt is IfStmt) {
+            if (isSDKCheckIfStmt) {
+                handleCheckingIfStmt(stmt, conditions, succUnits, animationChecked)
+            } else if (isAnimationEnabledIfStmt) {
+                handleCheckingIfStmt(stmt, conditions, succUnits, true)
+            } else {
                 for (u in succUnits) {
-                    innerTraverse(u, negativeConditions, true)
+                    innerTraverse(u, conditions, animationChecked)
                 }
             }
         }
