@@ -91,12 +91,7 @@ object AndroidSDKVersionChecker {
             traverse(body, graph, unit, sdkValues, animationEnabledProxies, visitedUnits, conditions, animationChecked)
         }
 
-        fun handleCheckingIfStmt(
-            stmt: IfStmt,
-            conditions: Set<String?>,
-            succUnits: MutableList<Unit>,
-            animation: Boolean,
-        ) {
+        fun handleCheckingIfStmt(stmt: IfStmt, animation: Boolean) {
             innerTraverse(stmt.target, conditions.plus(stmt.condition.toString()), animation)
 
             succUnits.remove(stmt.target)
@@ -109,9 +104,9 @@ object AndroidSDKVersionChecker {
 
         if (stmt is IfStmt) {
             if (isSDKCheckIfStmt) {
-                handleCheckingIfStmt(stmt, conditions, succUnits, animationChecked)
+                handleCheckingIfStmt(stmt, animationChecked)
             } else if (isAnimationEnabledIfStmt) {
-                handleCheckingIfStmt(stmt, conditions, succUnits, true)
+                handleCheckingIfStmt(stmt, true)
             } else {
                 for (u in succUnits) {
                     innerTraverse(u, conditions, animationChecked)
